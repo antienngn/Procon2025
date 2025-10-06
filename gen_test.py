@@ -51,10 +51,7 @@ def generate_problem(N):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    # N = random.randrange(4, 25, 1)
-    # while (N * N) % 2 != 0 or (N * N) // 2 > 23:  
-    #     N = random.randrange(4, 24, 1)
-    
+    #Number is even and in range 4 to 24    
     N = 12
     generate_problem(N)
 
