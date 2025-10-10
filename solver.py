@@ -8,9 +8,11 @@ key_feature = ["problem", "field", "entities"]
 
 def solver():
     garden = extract_entities(file_path=file_path, key_feature=key_feature)
-    print(garden,"\n")
+    print(garden.shape[0],"\n")
+
     temp = rotate90(x_cord=0, y_cord=0, size=3, garden=garden)
-    print(temp)
+    
+    # print(temp)
     # return temp
 
         
