@@ -8,14 +8,17 @@ key_feature = ["problem", "field", "entities"]
 
 def solver():
     garden = extract_entities(file_path=file_path, key_feature=key_feature)
-    print(garden.shape[0],"\n")
-
-    temp = rotate90(x_cord=0, y_cord=0, size=3, garden=garden)
+    rows, columns = garden.shape
+    for i in rows:
+        for j in columns:
+            if garden[i][j]:
+                rotate90(x_cord=0, y_cord=0, size=3, garden=garden)
     
     # print(temp)
     # return temp
 
-        
+def bfs():
+    return        
 
 if __name__ == "__main__":
     # print(np.array(extract_entities(file_path=file_path,key_feature=key_feature)))
