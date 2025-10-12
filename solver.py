@@ -11,7 +11,7 @@ def solver():
     rows, columns = garden.shape
     for i in rows:
         for j in columns:
-            if garden[i][j]:
+            if garden[i][j] != garden[i+1][j+1]:
                 rotate90(x_cord=0, y_cord=0, size=3, garden=garden)
     
     # print(temp)
