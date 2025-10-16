@@ -20,7 +20,10 @@ key_feature = ["problem", "field", "entities"]
 #          [21,36,18,63,19,66,45,6,7,0,5,11],
 #          [3,62,50,15,53,62,25,64,35,67,42,38]])
 
-board = np.array([[5,5,7,2],[0,3,6,0],[4,7,2,4],[1,6,3,1]])
+board = np.array([[5,5,7,2],
+                  [0,3,6,0],
+                  [4,7,2,4],
+                  [1,6,3,1]])
 
 def solver(board):
     shape = board.shape[0]
@@ -29,44 +32,42 @@ def solver(board):
     score = 0
     ops = []
     while score < total_pairs:
-        make_move = False
-
         for i in range(shape):
             for j in range(shape):
-                if not paired[i][j]:
-                    partner = find_partner(i,j, board, paired)
-                    if partner is None:
-                        paired[i][j] = True
-                        continue
+                if paired[i][j]:
+                    continue
+                    
+                partner = find_partner(i,j, board, paired)
+                if partner is None:
+                    paired[i][j] = True
+                    continue
 
-                    x,y = partner
-                    if abs(i-x) + abs(j-y) == 1:
-                        paired[i][j] = True
-                        paired[x][y] = True
-                        score += 1
-                        make_move = True
-                        break 
-                    block = select_block(i,j,x,y, shape)
-                    if block is not None:
-                        x_cord,y_cord,size = block
-                        board = rotate90(y_cord, x_cord, size, board)
-                        ops.append((x_cord,y_cord,size))
-                        if abs(i - x) + abs(j - y) == 1:
-                            paired[i, j] = True
-                            paired[x, y] = True
-                            score += 1
-                    make_move = True
-                    break  
-            if make_move:
-                break
+                x,y = partner
+                if abs(i-x) + abs(j-y) == 1:
+                    paired[i][j] = True
+                    paired[x][y] = True
+                    score += 1
+                    break
+
+                while abs(i-x) + abs(j-y) != 1:
+                    block = select_block(i,j,x,y,shape)
+                    if block is None:
+                        break
+                    r,c,k = block
+                    board = rotate90(i,j,k, board)
+                    ops.append((j,i,k))
+                    
+                if abs(i - x) + abs(j - y) == 1:
+                    print("H")
+                    paired[i, j] = True
+                    paired[x, y] = True
+                    score += 1 
     return board, ops
 
 
 
 
 if __name__ == "__main__":
-    # print(np.array(extract_entities(file_path=file_path,key_feature=key_feature)))
-    # print(solver())
     new_board, ops = solver(board=board)
     print(f"Number of step: {len(ops)}")
     print(new_board)
