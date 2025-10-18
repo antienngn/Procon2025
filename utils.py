@@ -1,6 +1,5 @@
 import json 
 import numpy as np
-from collections import defaultdict
 
 
 def extract_entities(file_path, key_feature):
@@ -32,40 +31,6 @@ def find_partner(x,y, board, paired):
 
 def select_block(i, j, x, y, shape):
     dx, dy = x - i, y - j
-    abs_dx, abs_dy = abs(dx), abs(dy)
 
-    # 1) Chọn cạnh cho A
-    if abs_dx >= abs_dy:
-        side = 'right' if dx > 0 else 'left'
-    else:
-        side = 'top'   if dy > 0 else 'bottom'
-
-    # 2) Chọn k = bước di chuyển + 1, trong [2..n]
-    k = max(abs_dx, abs_dy) + 1
-    k = min(max(k, 2), shape)
-
-    # 3) Tính r,c để A nằm đúng trên cạnh side
-    if side == 'top':
-        r = i
-        c = j - (k // 2)
-    elif side == 'bottom':
-        r = i - (k - 1)
-        c = j - (k // 2)
-    elif side == 'left':
-        c = j
-        r = i - (k // 2)
-    else:  # 'right'
-        c = j - (k - 1)
-        r = i - (k // 2)
-
-    # 4) Clamp vào biên [0..n-k]
-    r = max(0, min(r, shape - k))
-    c = max(0, min(c, shape - k))
-
-    # 5) Đảm bảo A nằm trong block; B không nằm trong block
-    if not (r <= i < r + k and c <= j < c + k):
-        return None
-    if (r <= x < r + k and c <= y < c + k):
-        return None
     
     return (r, c, k)

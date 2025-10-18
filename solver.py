@@ -56,16 +56,12 @@ def solver(board):
                     r,c,k = block
                     board = rotate90(i,j,k, board)
                     ops.append((j,i,k))
-                    
+
                 if abs(i - x) + abs(j - y) == 1:
-                    print("H")
                     paired[i, j] = True
                     paired[x, y] = True
                     score += 1 
     return board, ops
-
-
-
 
 if __name__ == "__main__":
     new_board, ops = solver(board=board)
