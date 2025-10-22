@@ -44,4 +44,4 @@ def find_partner(x,y, board, paired):
         for j in range(board.shape[0]):
             if (i,j) != (x,y) and not paired[i][j] and board[i][j] == v:
                 return (i,j)
-    return None
+    return None, None
