@@ -18,7 +18,11 @@ def extract_entities(file_path, key_feature):
 
 def rotate90(x_cord, y_cord, size, garden):
     sub = garden[y_cord:y_cord+size, x_cord:x_cord+size]
-    garden[y_cord:y_cord+size, x_cord:x_cord+size] = np.flip(sub.T, axis=1)
+    try:
+        garden[y_cord:y_cord+size, x_cord:x_cord+size] = np.flip(sub.T, axis=1)
+    except:
+        print(garden[y_cord:y_cord+size, x_cord:x_cord+size], np.flip(sub.T, axis=1))
+        exit(0)
     return garden
 
 def check_distance(x1,y1,x2,y2):

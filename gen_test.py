@@ -52,8 +52,8 @@ def generate_problem(N):
 
 if __name__ == "__main__":
     #Number is even and in range 4 to 24    
-    N = 12
-    generate_problem(N)
+    N = 4
+    generate_problem(4)
 
     #Just check my code :)
     # mat = generate_matrix(N)
