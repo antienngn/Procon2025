@@ -16,13 +16,14 @@ def extract_entities(file_path, key_feature):
 
     return np.array(problem)
 
-def rotate90(x_cord, y_cord, size, garden):
+def rotate90(x_cord, y_cord, size, garden, ops):
     sub = garden[y_cord:y_cord+size, x_cord:x_cord+size]
     try:
         garden[y_cord:y_cord+size, x_cord:x_cord+size] = np.flip(sub.T, axis=1)
     except:
         print(garden[y_cord:y_cord+size, x_cord:x_cord+size], np.flip(sub.T, axis=1))
         exit(0)
+    ops.append({"x": x_cord, "y": y_cord, "n": size})
     return garden
 
 def check_distance(x1,y1,x2,y2):

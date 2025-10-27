@@ -6,6 +6,8 @@ url = 'https://proconvn.duckdns.org'
 qid = 68
 r = requests.get(f'{url}/question/{qid}', headers=headers)
 
+# file_path = "./Problem/problem.json"
+# key_feature = ["problem", "field", "entities"]
 
 question = r.json()
 data = json.loads(question["question_data"])
