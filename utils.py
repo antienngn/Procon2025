@@ -105,12 +105,17 @@ def select_dynamic_block(x1,y1,x2,y2,board):
             else:
                 x_cord,y_cord,size,n_iterations = (x1,y1-abs(x1-shape), dy+1,1)
         else:
-            if dx == dy:
-                x_cord, y_cord, size, n_iterations = (x1,y1,dy+1,2)
-            if dx > dy:
-                x_cord,y_cord,size,n_iterations = (x2-dy,y2-dy,dy+1,1)
-            if dx < dy:
-                x_cord, y_cord, size, n_iterations = (x2-dx,y2-dx,dx+1,1)
+            xx = x1+1
+            yy = y1-1
+            if abs(xx-x2) == abs(yy-y2):
+                x_cord,y_cord,size,n_iterations = (x1+1,y1-1,abs(yy-y2)+1,2)
+            else:
+                if dx == dy:
+                    x_cord, y_cord, size, n_iterations = (x1,y1,dy+1,2)
+                if dx > dy:
+                    x_cord,y_cord,size,n_iterations = (x2-dy,y2-dy,dy+1,1)
+                if dx < dy:
+                    x_cord, y_cord, size, n_iterations = (x2-dx,y2-dx,dx+1,1)
     else:
         if dy == 0:
             if dx < abs(y2-shape):
@@ -118,23 +123,13 @@ def select_dynamic_block(x1,y1,x2,y2,board):
             else:
                 x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape),1)
         elif dx == 0:
-            # if dy < abs(x1-shape):
-            #     x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
-            # else:
-            #     x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
+            if dy < abs(x1-shape):
+                x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
+            else:
+                x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
             """
             Modify when in same column
             """
-            if dy < abs(x1-shape) and dy > x1:
-                x_cord,y_cord,size,n_iterations = (x1,y1,dy+1,1)
-            elif dy > abs(x1-shape) and dy < x1:
-                x_cord,y_cord,size,n_iterations = (x2,y1,dy+1,1)
-            elif dy == abs(x1-shape) or dy == x1:
-                x_cord,y_cord,size,n_iterations = (x1,y1,dy+1,1)
-            elif dy > abs(x1-shape) and dy > x1 and abs(x1-shape) > x1:
-                x_cord,y_cord,size,n_iterations = (x1,y1-abs(x1-shape)+1,abs(x1-shape),1)
-            elif dy > abs(x1-shape) and dy > x1 and abs(x1-shape) < x1:
-                x_cord,y_cord,size,n_iterations = (0,y1,x1+1,3)
         elif dy == 1 and dx != 1:
             x_cord,y_cord,size,n_iterations = (x2,y2-1,2, 1)
         else:
