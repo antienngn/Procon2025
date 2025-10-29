@@ -23,7 +23,7 @@ def rotate90(x_cord, y_cord, size, n_iterations, garden, ops):
         try:
             garden[y_cord:y_cord+size, x_cord:x_cord+size] = np.flip(sub.T, axis=1)
         except:
-            print(garden[y_cord:y_cord+size, x_cord:x_cord+size], np.flip(sub.T, axis=1))
+            print("Error: cannot rotate", garden, garden[y_cord][x_cord], x_cord, y_cord)
             exit(0)
         ops.append({"x": x_cord, "y": y_cord, "n": size})
     return garden
@@ -34,7 +34,9 @@ def check_distance(x1,y1,x2,y2):
     return False
 
 def cal_distance(x1,y1,x2,y2):
-    return abs(x1-x2) + abs(y1-y2)
+    dx = abs(x1 - x2)
+    dy = abs(y1 - y2)
+    return (dx+dy)
 
 def find_positions(i_dup,j_dup,board):
     v = board[i_dup][j_dup]
@@ -53,65 +55,95 @@ def find_partner(x,y, board, paired):
                 return (i,j)
     return None, None
 
+def select_dynamic_block_last_two_rows_plgr(x1,y1,x2,y2):
+    x_cord,y_cord,size, n_iterations = 1,1,1,1
+    dx = abs(x1-x2)
+    dy = abs(y1-y2)
+    if y1 < y2:
+        if dx == 1 and dy == 1:
+            x_cord,y_cord,size,n_iterations = (x2,y2-1,2,1)
+        else:
+            x_cord,y_cord,size,n_iterations = (x2-1,y2-1,2,1)
+    else:
+        x_cord,y_cord,size,n_iterations = (x2-1,y2,2,3)
+
+    return x_cord,y_cord,size,n_iterations    
+
+def select_dynamic_block_last_two_rows(x1,y1,x2,y2):
+    x_cord,y_cord,size, n_iterations = 1,1,1,1
+    dx = abs(x1-x2)
+    dy = abs(y1-y2)
+    if y1 < y2:
+        if dx == 1 and dy == 1:
+            x_cord,y_cord,size,n_iterations = (x2-1,y2-1,2,1)
+        else:
+            x_cord,y_cord,size,n_iterations = (x2,y2-1,2,2)
+    else:
+        x_cord,y_cord,size,n_iterations = (x2,y2,2,1)
+
+    return x_cord,y_cord,size,n_iterations    
+
 def select_dynamic_block(x1,y1,x2,y2,board):
     x_cord,y_cord,size, n_iterations = 1,1,1,1
     shape = board.shape[0]
     dx = abs(x1-x2)
     dy = abs(y1-y2)
-    # print(dx, dy)
     if x1 < x2:
         if dy == 0:
-            if dx <= abs(y2-shape):
+            if dx < abs(y2-shape):
                 x_cord,y_cord,size,n_iterations = (x1,y1,dx+1,3)
             else:
                 x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y1,abs(y2-shape),1)
+        elif dy == 1 and y2 < y1:
+            if abs(x2-x1+1) <= abs(y2-shape):
+                x_cord,y_cord,size,n_iterations = (x1+1,y2,dx,3)
+            else:
+                x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y2,abs(y2-shape),3)
         elif dx == 0:
-            if dy == 1 and x1 == shape - 1:
-                x_cord, y_cord,size, n_iterations = (x1-1,y1+1,dy+1,3)
-
-            if dy <= abs(x1-shape):
+            if dy <= abs(x2-shape):
                 x_cord,y_cord,size,n_iterations = (x1,y1, dy+1,1)
             else:
-                x_cord,y_cord,size,n_iterations = (x2-dx-1,y1-abs(x1-shape), dy+1,1)
+                x_cord,y_cord,size,n_iterations = (x1,y1-abs(x1-shape), dy+1,1)
         else:
             if dx == dy:
                 x_cord, y_cord, size, n_iterations = (x1,y1,dy+1,2)
             if dx > dy:
-                if dx <= abs(y1-shape):
-                    x_cord, y_cord, size, n_iterations = (x2-dx,y2,dx,1)
-                    print(x_cord,y_cord)
-                
+                x_cord,y_cord,size,n_iterations = (x2-dy,y2-dy,dy+1,1)
             if dx < dy:
-                if dx <= abs(y1-shape):
-                    x_cord, y_cord, size, n_iterations = (x2-dx,y2-dy,dx+1,1)
+                x_cord, y_cord, size, n_iterations = (x2-dx,y2-dx,dx+1,1)
     else:
         if dy == 0:
-            if dx <= abs(y2-shape):
+            if dx < abs(y2-shape):
                 x_cord,y_cord,size,n_iterations = (x2,y2,dx+1,1)
             else:
-                x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape)+1,1)
+                x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape),1)
         elif dx == 0:
-            if dy <= abs(y2-shape):
-                x_cord,y_cord,size,n_iterations = (x2,y1, dy+1,1)
-            else:
-                x_cord,y_cord,size,n_iterations = (x2-dx-1,y1, dy+1,3)
-        elif dy == 1:
-            if dx <= abs(y2-shape):
-                x_cord,y_cord,size,n_iterations = (x2,y2,dx+1, 1)
-            if dx == 1:
-                x_cord,y_cord,size,n_iterations = (x1,y1,dx+1,1)
+            # if dy < abs(x1-shape):
+            #     x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
+            # else:
+            #     x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
+            """
+            Modify when in same column
+            """
+            if dy < abs(x1-shape) and dy > x1:
+                x_cord,y_cord,size,n_iterations = (x1,y1,dy+1,1)
+            elif dy > abs(x1-shape) and dy < x1:
+                x_cord,y_cord,size,n_iterations = (x2,y1,dy+1,1)
+            elif dy == abs(x1-shape) or dy == x1:
+                x_cord,y_cord,size,n_iterations = (x1,y1,dy+1,1)
+            elif dy > abs(x1-shape) and dy > x1 and abs(x1-shape) > x1:
+                x_cord,y_cord,size,n_iterations = (x1,y1-abs(x1-shape)+1,abs(x1-shape),1)
+            elif dy > abs(x1-shape) and dy > x1 and abs(x1-shape) < x1:
+                x_cord,y_cord,size,n_iterations = (0,y1,x1+1,3)
+        elif dy == 1 and dx != 1:
+            x_cord,y_cord,size,n_iterations = (x2,y2-1,2, 1)
         else:
             if dx == dy:
                 x_cord, y_cord, size, n_iterations = (x2,y1,dy+1,2)
-            if dx < dy:
-                if dy <= abs(y1-shape) and dy <= abs(x2-shape):
-                    x_cord,y_cord,size,n_iterations = (x2,y2-dy,dy+1,1)
-                else:
-                    x_cord,y_cord,size,n_iterations = (x2,y2-abs(x2-shape)+1,abs(x2-shape),1)
-            if dx > dy:
-                if dy <= abs(y1-shape) and dy <= abs(x2-shape):
+            else:
+                if dy < abs(x2-shape):
                     x_cord,y_cord,size,n_iterations = (x2,y2-dy,dy+1, 1)
                 else:
                     x_cord,y_cord,size,n_iterations = (x2,y2-abs(x2-shape)+1, abs(x2-shape),1)
-        
+    
     return (x_cord,y_cord,size, n_iterations)
