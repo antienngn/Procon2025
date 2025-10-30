@@ -123,6 +123,11 @@ def select_dynamic_block(x1,y1,x2,y2,board):
             else:
                 x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape),1)
         elif dx == 0:
+            # if dy < abs(x1-shape):
+            #     x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
+            # else:
+            #     x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
+            
             if dy < abs(x1-shape):
                 x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
             else:
