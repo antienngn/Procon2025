@@ -1,6 +1,6 @@
 import numpy as np
 import json
-from utils import rotate90, find_partner, check_distance, cal_distance, find_positions, select_dynamic_block, select_dynamic_block_last_two_rows
+from utils import rotate90, find_partner, check_distance, cal_distance, find_positions, select_dynamic_block
 
 """
 Rewrite select dynamic block for column
@@ -56,6 +56,7 @@ def solver(board, i=0):
 
     for i in range(i+2, shape):
         for j in range(shape - i - 1, shape - i - 3, -1):
+            print("Jump here")
             if paired[i][j] == True:
                 continue
         
