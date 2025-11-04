@@ -1,10 +1,86 @@
 import numpy as np
 import json
-from utils import rotate90, find_partner, check_distance, cal_distance, find_positions, select_dynamic_block
+from utils import rotate90, find_partner, check_distance, cal_distance, find_positions
+
+def select_dynamic_block_rows(x1,y1,x2,y2,board):
+    x_cord,y_cord,size, n_iterations = 1,1,1,1
+    shape = board.shape[0]
+    dx = abs(x1-x2)
+    dy = abs(y1-y2)
+    if x1 < x2:
+        if dy == 0:
+            if dx < abs(y2-shape):
+                x_cord,y_cord,size,n_iterations = (x1,y1,dx+1,3)
+            else:
+                x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y1,abs(y2-shape),1)
+        elif dy == 1 and y2 < y1:
+            if abs(x2-x1+1) <= abs(y2-shape):
+                x_cord,y_cord,size,n_iterations = (x1+1,y2,dx,3)
+            else:
+                x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y2,abs(y2-shape),3)
+        elif dx == 0:
+            if dy <= abs(x2-shape):
+                x_cord,y_cord,size,n_iterations = (x1,y1, dy+1,1)
+            else:
+                x_cord,y_cord,size,n_iterations = (x1,y1-abs(x1-shape), dy+1,1)
+        else:
+            xx = x1+1
+            yy = y1-1
+            if abs(xx-x2) == abs(yy-y2):
+                x_cord,y_cord,size,n_iterations = (x1+1,y1-1,abs(yy-y2)+1,2)
+            else:
+                if dx == dy:
+                    x_cord, y_cord, size, n_iterations = (x1,y1,dy+1,2)
+                if dx > dy:
+                    x_cord,y_cord,size,n_iterations = (x2-dy,y2-dy,dy+1,1)
+                if dx < dy:
+                    x_cord, y_cord, size, n_iterations = (x2-dx,y2-dx,dx+1,1)
+    else:
+        if dy == 0:
+            if dx < abs(y2-shape):
+                x_cord,y_cord,size,n_iterations = (x2,y2,dx+1,1)
+            else:
+                x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape),1)
+        elif dx == 0:
+            # if dy < abs(x1-shape):
+            #     x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
+            # else:
+            #     x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
+            
+            if dy < abs(x1-shape):
+                x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
+            else:
+                x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
+            """
+            Modify when in same column
+            """
+        elif dy == 1 and dx != 1:
+            x_cord,y_cord,size,n_iterations = (x2,y2-1,2, 1)
+        else:
+            if dx == dy:
+                x_cord, y_cord, size, n_iterations = (x2,y1,dy+1,2)
+            else:
+                if dy < abs(x2-shape):
+                    x_cord,y_cord,size,n_iterations = (x2,y2-dy,dy+1, 1)
+                else:
+                    x_cord,y_cord,size,n_iterations = (x2,y2-abs(x2-shape)+1, abs(x2-shape),1)
+    
+    return (x_cord,y_cord,size, n_iterations)
+
 
 """
 Rewrite select dynamic block for column
 """
+# def select_dynamic_block_colums(x1,y1,x2,y2,board):
+#     x_cord,y_cord,size, n_iterations = 1,1,1,1
+#     shape = board.shape[0]
+#     dx = abs(x1-x2)
+#     dy = abs(y1-y2)
+#     if x1 > x2:
+#         if
+#     else:
+
+
 
 def solver(board, i=0):
     """
@@ -18,11 +94,6 @@ def solver(board, i=0):
     if shape - i < 4:
         return board, shape
 
-    # shape = board.shape[0]
-    # total_pairs = (shape*shape)//2
-    # paired = np.full((shape,shape), False, dtype=bool)
-    # score = 0
-    # ops = []
     for i in range(i, i+2):
         for j in range(shape):
             if paired[i][j] == True:
@@ -42,7 +113,7 @@ def solver(board, i=0):
             i2 = i+1
             j2 = j
             while dist > 1:
-                x_cord,y_cord,size,n_iter = select_dynamic_block(j2,i2,jj,ii,board)
+                x_cord,y_cord,size,n_iter = select_dynamic_block_rows(j2,i2,jj,ii,board)
                 board = rotate90(x_cord,y_cord,size,n_iter,board,ops)
                 ii,jj = find_positions(i,j,board)
                 dist = cal_distance(i,j,ii,jj)
@@ -62,6 +133,8 @@ def solver(board, i=0):
         
             ii, jj = find_partner(i, j, board, paired)
             dist = cal_distance(i,j,ii,jj)
+            i2 = i+1
+            j2 = j
             while dist > 1:
                 if j <= 1:
                     if abs(ii-i) == 1 and abs(jj-j) == 1:
@@ -70,7 +143,7 @@ def solver(board, i=0):
                         board = rotate90(j-1,i-1,2,1,board,ops)
                         board = rotate90(j-1,i,2,1,board,ops)
                         break
-                x_cord,y_cord,size,n_iter = select_dynamic_block(j,i,jj,ii, board)
+                x_cord,y_cord,size,n_iter = select_dynamic_block_colums(j2,i2,jj,ii, board)
                 board = rotate90(x_cord,y_cord,size,n_iter,board,ops)
                 ii,jj = find_positions(i,j,board)
                 dist = cal_distance(i,j,ii,jj)
