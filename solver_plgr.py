@@ -127,13 +127,13 @@ def select_dynamic_block_colums(x1,y1,x2,y2,board):
     return (x_cord,y_cord,size, n_iterations)
 
 
-def solver(board, ops, r=0):
+def solver(board, paired, ops, r=0):
     """
     Using dynamic size to rotate (not yet optimal :) ) 
     """
     shape = board.shape[0]
-    total_pairs = (shape*shape)//2
-    paired = np.full((shape,shape), False, dtype=bool)
+    # total_pairs = (shape*shape)//2
+    # paired = np.full((shape,shape), False, dtype=bool)
     score = 0
     # ops = []
     if shape - r < 4:
@@ -145,15 +145,6 @@ def solver(board, ops, r=0):
                 continue
             
             ii, jj = find_partner(i, j, board, paired)
-            # if check_distance(i,j,ii,jj):
-            #     if abs(ii - i) == 1 and abs(jj-j) == 0:
-            #         board = rotate90(j, i, 2,1, board,ops)
-            #     ii, jj = find_positions(i, j, board) 
-            #     paired[i][j] = True
-            #     paired[ii][jj] = True
-            #     score += 1
-            #     continue
-            
             dist = cal_distance(i,j,ii,jj)
             i2 = i+1
             j2 = j
@@ -165,6 +156,7 @@ def solver(board, ops, r=0):
 
             if abs(ii - i) == 1 and abs(jj-j) == 0:
                 board = rotate90(j, i, 2, 1, board, ops)
+            
             ii, jj = find_positions(i, j, board)
             paired[i][j] = True
             paired[ii][jj] = True
@@ -174,36 +166,40 @@ def solver(board, ops, r=0):
         for j in range(shape-r-1, shape-r-3, -1):
             if paired[i][j] == True:
                 continue
+
             ii, jj = find_partner(i, j, board, paired)
             dist = cal_distance(i,j,ii,jj)
             i2 = i+1
             j2 = j
             while dist > 1:
-                # if j <= 1:
-                #     if abs(ii-i) == 1 and abs(jj-j) == 1:
-                #         board = rotate90(j-1,i-1,2,3,board,ops)
-                #         board = rotate90(j,i-1,3,3,board,ops)
-                #         board = rotate90(j-1,i-1,2,1,board,ops)
-                #         board = rotate90(j-1,i,2,1,board,ops)
-                #         break
                 x_cord,y_cord,size,n_iter = select_dynamic_block_colums(j2,i2,jj,ii, board)
                 board = rotate90(x_cord,y_cord,size,n_iter,board,ops)
-                # print(board)
                 ii,jj = find_positions(i,j,board)
                 dist = cal_distance(i,j,ii,jj)
 
             if abs(ii - i) == 0 and abs(jj-j) == 1:
                 board = rotate90(j-1,i,2, 1,board, ops)
+            
             ii, jj = find_positions(i, j, board)
             paired[i][j] = True
             paired[ii][jj] = True
             score += 1
-            # print(board)
-
+    print(board)
     return board, r + 2
 
 def solver_recur(board):
+    ops = []
+    shape = board.shape[0]
+    paired = np.full((shape,shape), False, dtype=bool)
+    r = 0
+    b = board
+    while r < shape:
+        new_board,r = solver(b,paired,ops,r)
+        print(f"Value of board \n {new_board}")
+        if shape - r < 4:
+            break
 
+    return new_board,ops
 
 if __name__ == "__main__":
     board = np.array([[47,16,39,48,51,69,8,59,2,70,30,52],
@@ -227,4 +223,4 @@ if __name__ == "__main__":
     # print(f"Number of step: {len(ops)}")
     with open("answer.json", "w") as f:
         json.dump(ops, f)
-    print(new_board)
+    # print(new_board)

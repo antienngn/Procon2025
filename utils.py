@@ -23,7 +23,7 @@ def rotate90(x_cord, y_cord, size, n_iterations, garden, ops):
         try:
             garden[y_cord:y_cord+size, x_cord:x_cord+size] = np.flip(sub.T, axis=1)
         except:
-            print("Error: cannot rotate", garden, garden[y_cord][x_cord], x_cord, y_cord)
+            print("Error: cannot rotate", "\n", garden, garden[y_cord][x_cord], x_cord, y_cord)
             exit(0)
         ops.append({"x": x_cord, "y": y_cord, "n": size})
     return garden
