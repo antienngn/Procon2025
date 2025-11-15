@@ -53,7 +53,19 @@ def subboard_is_paired(boards):
 def possible_subboard_rotate(x1, y1, x2, y2, board):
     """
     Return list of x_cord, y_cord, size board for simulation
+    Have two target point (under, on the right)
     """
+    rotable_cells = []
+    dx = abs(x1-x2)
+    dy = abs(y1-y2)
+    if dx == dy:
+    
+    else:
+    
+    return rotable_cells
+
+
+
 
 def rotate90_simulator(x_cord, y_cord, size, n_iterations, garden):
     for i in range(n_iterations):
@@ -85,7 +97,6 @@ def rotate_simulator(rotable_cells,board):
     """
     Return x_cord,y_cord,size,n_iter (dictionary format) for rotate update
     """
-    n = board.shape[0]
     best_ops = dict()
     ancestor_board = board.copy()
     ancestor_board_pairs = count_pairs(ancestor_board)
@@ -117,7 +128,7 @@ def solver_special(board, ops, paired):
         for j in range(shape):
             if paired_checked[i][j] == True:
                 continue
-            
+
             ii, jj = find_partner(i , j, board, paired)
             rotate_cells = possible_subboard_rotate(j,i,jj,ii,board)
 
