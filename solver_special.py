@@ -33,129 +33,140 @@ def paired_mask(board, paired, shape):
     
     return paired
 
-def subboard_is_paired(boards):
-    mask_paired = []
-    for board in boards:
-        shape_x = board.shape[0]
-        shape_y = board.shape[1]
-        if shape_x != shape_y:
-            mask_paired.append(False)
+# def subboard_is_paired(boards):
+    # mask_paired = []
+    # for board in boards:
+    #     shape_x = board.shape[0]
+    #     shape_y = board.shape[1]
+    #     if shape_x != shape_y:
+    #         mask_paired.append(False)
         
-        paired = np.full((shape_x,shape_x), False, dtype=bool)
-        region_paired = paired_mask(board,paired,shape_x)
-        false_mask = np.logical_not(region_paired)
-        num_unpaired = np.sum(false_mask)
-        if num_unpaired == 1:
-            return mask_paired.append(True)
-    return mask_paired
+    #     paired = np.full((shape_x,shape_x), False, dtype=bool)
+    #     region_paired = paired_mask(board,paired,shape_x)
+    #     false_mask = np.logical_not(region_paired)
+    #     num_unpaired = np.sum(false_mask)
+    #     if num_unpaired == 1:
+    #         return mask_paired.append(True)
+    # return mask_paired
 
-
-# def possible_subboard_rotate(x1, y1, x2, y2, board):
-#     """
-#     Return list of x_cord, y_cord, size board for simulation
-#     Have two target point (under, on the right)
-#     """
-#     rotable_cells = []
-#     H,W = board.shape
-#     dx = abs(x1-x2)
-#     dy = abs(y1-y2)
-#     dx_board = [(x2,y2,dx),(x2-dx,y2,dx),(x2,y2-dx,dx),(x2-dx,y2-dy,dx)]
-#     dy_board = [(x2,y2,dy),(x2-dy,y2,dy),(x2,y2-dy,dy),(x2-dy,y2-dy,dy)]
-#     for i range (H,W):
-
-        
-
-
-#     return rotable_cells
-
-def possible_subboard_rotate(x1, y1, x2, y2, board, paired_global=None):
+def subboard_is_paired(board, paired_global, tx, ty, size):
     """
-    Return a list of subboards that:
-    (1) contain both (x1,y1) and (x2,y2)
-    (2) have (x2,y2) at one of the 4 corners of the square
-    (3) do NOT break existing global pairs inside this subboard
+    Kiểm tra subboard (tx, ty, size) có làm MẤT cặp nào đã ghép trong paired_global hay không.
+
+    board: board tổng
+    paired_global: mask đôi trong board tổng (True nếu ô đang thuộc cặp)
+    tx, ty: top-left
+    size: kích thước subboard
     """
-    H, W = board.shape
+    sub = board[ty:ty+size, tx:tx+size]
+    local_paired = np.full((size, size), False, dtype=bool)
+
+    for i in range(size):
+        for j in range(size):
+            if j + 1 < size and sub[i, j] == sub[i, j+1]:
+                local_paired[i, j] = local_paired[i, j+1] = True
+            if i + 1 < size and sub[i, j] == sub[i+1, j]:
+                local_paired[i, j] = local_paired[i+1, j] = True
+
+    for i in range(size):
+        for j in range(size):
+            gi = ty + i
+            gj = tx + j
+            # nếu global nói ô này thuộc 1 cặp
+            if paired_global[gi, gj]:
+                if not local_paired[i, j]:
+                    return False
+                
+    return True
+
+
+
+def possible_subboard_rotate(x1, y1, x2, y2, board, paired):
+    """
+    Return list of x_cord, y_cord, size board for simulation
+    Have two target point (under, on the right)
+    """
+    shape = board.shape[0]
     rotable_cells = []
+    dx = abs(x1-x2)
+    dy = abs(y1-y2)
+    # dx_board = [(x2,y2,dx+1),(x2-dx,y2,dx+1),(x2,y2-dx,dx+1),(x2-dx,y2-dx,dx+1)]
+    # dy_board = [(x2,y2,dy+1),(x2-dy,y2,dy+1),(x2,y2-dy,dy+1),(x2-dy,y2-dy,dy+1)]
+    if dx == 0:
+        size = dy  # co về đúng 1 size duy nhất
+        dy_board = [
+            (x1,y1,size),
+            (x2,       y2,       size),
+            (x2-(size-1),  y2,       size),
+            (x2,       y2-(size-1),  size),
+            (x2-(size-1),  y2-(size-1),  size)
+        ]
+        candidates = dy_board
 
-    # Compute min square size that can include both points
-    dx = abs(x1 - x2)
-    dy = abs(y1 - y2)
-    min_size = max(dx, dy) + 1
+    # ==========================
+    # CASE 2: dy = 0 (cùng hàng)
+    # ==========================
+    elif dy == 0:
+        size = dx  # co về đúng 1 size duy nhất
+        dx_board = [
+            (x1,y1,size),
+            (x2,y2,size),
+            (x2-(size-1),y2,size),
+            (x2,y2-(size-1),size),
+            (x2-(size-1),y2-(size-1),size)
+        ]
+        candidates = dx_board
 
-    # If global paired mask is not provided, compute it
-    if paired_global is None:
-        paired_global = np.full((H, H), False, dtype=bool)
-        for i in range(H):
-            for j in range(W):
-                if j+1 < W and board[i, j] == board[i, j+1]:
-                    paired_global[i, j] = paired_global[i, j+1] = True
-                if i+1 < H and board[i, j] == board[i+1, j]:
-                    paired_global[i, j] = paired_global[i+1, j] = True
-
-    # Try all possible sizes from min_size → full board
-    for size in range(min_size, min(H, W) + 1):
-
-        # Subboard must contain BOTH points, compute possible TL ranges
-        min_tx = max(0, min(x1, x2) - (size - 1))
-        max_tx = min(min(x1, x2), W - size)
-        min_ty = max(0, min(y1, y2) - (size - 1))
-        max_ty = min(min(y1, y2), H - size)
-
-        if min_tx > max_tx or min_ty > max_ty:
+    # ==========================
+    # CASE 3: dx>0 & dy>0 (chéo)
+    # ==========================
+    else:
+        dx_board = [
+            (x1,y1,dx+1),
+            (x2,y2,dx+1),
+            (x2-dx,y2,dx+1),
+            (x2,y2-dx,dx+1),
+            (x2-dx,y2-dx,dx+1)
+        ]
+        dy_board = [
+            (x1,y1,dy+1),
+            (x2,y2,dy+1),
+            (x2-dy,y2,dy+1),
+            (x2,y2-dy,dy+1),
+            (x2-dy,y2-dy,dy+1)
+        ]
+        candidates = dx_board + dy_board
+    # candidates = dx_board + dy_board
+    print(f"Before pruning: {candidates}")
+    for (tx_raw, ty_raw, base_size) in candidates:
+        tx = tx_raw
+        ty = ty_raw
+        size = base_size
+        if tx < 0 or ty < 0:
             continue
 
-        for tx in range(min_tx, max_tx + 1):
-            for ty in range(min_ty, max_ty + 1):
+        # --------- 2. Check size hợp lệ ---------
+        if size < 2:
+            continue
+        if tx + size > shape or ty + size > shape:
+            continue
 
-                # -------------- (A) CHECK CORNER CONDITION ----------------
-                corners = [
-                    (tx, ty),
-                    (tx + size - 1, ty),
-                    (tx, ty + size - 1),
-                    (tx + size - 1, ty + size - 1)
-                ]
-                if (x2, y2) not in corners:
-                    continue
+        # --------- 3. Check phần tử trong subboard không âm ---------
+        # sub = board[ty:ty+size, tx:tx+size]
+        # if np.any(sub < 0):
+        #     continue
 
-                # -------------- (B) CHECK THAT PAIRED CELLS REMAIN PAIRED --------------
-                sub = board[ty:ty+size, tx:tx+size]
-                local_paired = np.full((size, size), False, dtype=bool)
+        # --------- 5. Check không phá cặp đã ghép ---------
+        if not subboard_is_paired(board, paired, tx, ty, size):
+            continue
 
-                # compute local pairs for the subboard
-                for i in range(size):
-                    for j in range(size):
-                        if j+1 < size and sub[i, j] == sub[i, j+1]:
-                            local_paired[i, j] = local_paired[i, j+1] = True
-                        if i+1 < size and sub[i, j] == sub[i+1, j]:
-                            local_paired[i, j] = local_paired[i+1, j] = True
-
-                # Now check consistency with global paired mask
-                # If a cell is paired globally AND lies inside this subboard
-                # then it must be paired in local_paired
-                consistent = True
-                for i in range(size):
-                    for j in range(size):
-                        global_i = ty + i
-                        global_j = tx + j
-                        if paired_global[global_i, global_j] and not local_paired[i, j]:
-                            consistent = False
-                            break
-                    if not consistent:
-                        break
-
-                if not consistent:
-                    continue
-
-                # Passed all conditions
-                rotable_cells.append({
-                    "x_cord": tx,
-                    "y_cord": ty,
-                    "size": size
-                })
-
+        rotable_cells.append({
+            "x_cord": tx,
+            "y_cord": ty,
+            "size": size
+        })
+        print(f"After pruning {rotable_cells}")
     return rotable_cells
-
 
 def rotate90_simulator(x_cord, y_cord, size, n_iterations, garden):
     for i in range(n_iterations):
@@ -202,6 +213,7 @@ def rotate_simulator(rotable_cells,board):
                                         "number_of_pair":count_pairs(simulator_board)})
     
     highest_num_pair = find_max_number_of_pairs(simulator_pairs, "number_of_pair")
+    # print(f"print highest num pair {simulator_pairs}")
     if ancestor_board_pairs < highest_num_pair["number_of_pair"]:
         best_ops["x_cord"] = highest_num_pair["x_cord"]
         best_ops["y_cord"] = highest_num_pair["y_cord"]
@@ -219,15 +231,15 @@ def solver_special(board, ops, paired):
             if paired_checked[i][j] == True:
                 continue
 
-            ii, jj = find_partner(i , j, board, paired)
-            rotate_cells = possible_subboard_rotate(j,i,jj,ii,board,paired)
-
+            ii, jj = find_partner(i , j, board, paired_checked)
+            # print(board)
+            print(f"print {ii,jj, board[ii][jj]}")
+            rotate_cells = possible_subboard_rotate(j,i,jj,ii,board,paired_checked)
             rotate_op = rotate_simulator(rotate_cells, board)
             x_cord = rotate_op["x_cord"]
             y_cord = rotate_op["y_cord"]
             size = rotate_op["size"]
             n_iter = rotate_op["n_iter"]
-
             board = rotate90(x_cord,y_cord,size,n_iter,board,ops,r=0)
 
             paired_checked = paired_mask(board,paired,shape)
@@ -235,13 +247,16 @@ def solver_special(board, ops, paired):
 
 
 if __name__ == "__main__":
-    board = np.array([[0,0,1,2,2,3,4,5,6,6,7,8],[9,9,1,10,11,3,4,5,12,12,7,8],[13,14,14,10,11,15,15,16,16,17,18,18],[13,19,20,20,21,22,22,29,29,23,24,24],[25,19,26,27,21,28,28,30,30,23,31,32],[25,33,26,27,34,35,36,37,31,17,37,32],[38,33,39,40,34,35,36,41,42,42,43,44],[38,45,39,40,46,47,47,41,48,49,43,44],[50,45,51,52,46,53,53,54,48,49,55,55],[50,56,51,52,57,57,58,54,59,60,61,61],[62,56,63,63,64,64,58,65,59,60,66,67],[62,68,68,69,69,70,70,65,71,71,66,67]])
-
+    # board = np.array([[0,1,2,3,3,4,5,5,6,6,7,8,9,10,11,11,12,13,13,14],[0,1,2,15,16,4,17,18,19,20,7,8,9,10,21,22,12,23,24,14],[25,25,26,15,16,27,17,18,19,20,28,28,29,29,40,40,21,23,24,31],[32,32,26,33,34,27,35,36,37,37,38,38,39,39,41,41,22,42,43,31],[44,45,45,33,34,46,35,36,47,47,48,48,49,50,51,30,30,42,43,52],[44,53,54,55,55,46,56,56,57,58,58,59,49,50,60,61,51,62,63,52],[64,53,54,65,66,66,67,67,57,68,68,59,69,69,60,61,70,62,63,71],[64,72,73,65,74,75,75,76,77,77,78,79,80,81,82,82,70,83,84,71],[85,72,73,86,74,87,88,76,89,90,78,79,80,81,91,91,92,83,84,93],[85,94,95,86,96,87,88,97,89,90,98,99,99,100,100,101,92,102,103,93],[104,94,95,105,96,106,107,97,108,109,98,110,110,111,112,101,113,102,103,114],[104,115,116,105,117,106,107,118,108,109,119,119,120,111,112,121,113,122,123,114],[124,115,116,125,117,126,126,118,127,127,128,128,120,129,130,121,131,122,123,132],[124,133,134,125,135,136,176,166,155,147,136,139,140,129,130,141,131,142,143,132],[144,133,134,145,135,146,167,167,155,147,137,139,140,150,150,141,151,142,143,152],[144,153,153,145,154,146,177,156,156,148,137,158,159,159,160,160,151,161,162,152],[163,164,164,165,154,166,178,157,157,148,138,158,169,169,170,171,171,161,162,172],[163,173,173,165,174,175,168,168,149,149,138,179,180,181,189,170,182,183,183,172],[184,184,185,186,174,175,176,187,177,178,188,179,180,181,189,182,190,191,192,192],[193,193,185,186,194,194,199,187,195,195,188,196,196,197,197,199,190,191,198,198]])
+    # board = np.array([[0,0,1,2,2,3,4,5,6,6,7,8],[9,9,1,10,11,3,4,5,12,12,7,8],[13,14,14,10,11,15,15,16,16,17,18,18],[13,19,20,20,21,22,22,29,29,23,24,24],[25,19,26,27,21,28,28,30,30,23,31,32],[25,33,26,27,34,35,36,37,31,17,37,32],[38,33,39,40,34,35,36,41,42,42,43,44],[38,45,39,40,46,47,47,41,48,49,43,44],[50,45,51,52,46,53,53,54,48,49,55,55],[50,56,51,52,57,57,58,54,59,60,61,61],[62,56,63,63,64,64,58,65,59,60,66,67],[62,68,68,69,69,70,70,65,71,71,66,67]])
+    # board = np.array([[0,1,1,2,3,4,4,5,5,6,6,7,8,8,9,10],[0,11,11,2,3,12,13,13,14,15,16,7,17,17,9,10],[18,18,19,20,21,12,22,22,14,15,16,23,23,24,24,25],[26,26,19,20,21,27,28,28,29,29,30,30,31,31,32,25],[33,33,34,35,35,27,36,37,37,38,38,39,40,41,32,42],[43,43,34,44,44,45,36,46,55,47,48,39,40,41,49,42],[50,51,51,52,53,45,54,46,55,47,48,56,57,57,49,58],[50,59,60,52,68,53,54,62,62,63,72,63,64,64,65,58],[66,59,60,67,61,61,69,70,71,71,73,56,74,74,65,75],[66,76,77,67,68,78,69,70,79,80,72,73,81,81,82,75],[83,76,77,84,85,78,86,86,79,80,87,87,88,88,82,89],[83,90,91,84,85,92,92,93,94,95,95,96,96,97,97,89],[98,90,91,99,100,101,101,93,94,102,103,104,105,106,106,107],[98,108,109,99,100,110,110,111,112,102,103,104,105,113,114,107],[115,108,109,116,116,117,117,111,112,118,118,119,119,113,114,120],[115,121,121,122,122,123,123,124,124,125,125,126,126,127,127,120]])
+    board = np.array([[0,1,2,2,3,4,5,5,6,7,7,8],[0,1,9,10,3,4,11,12,6,13,14,8],[15,15,9,10,16,17,11,12,18,13,14,19],[20,21,21,22,16,17,23,23,18,24,25,19],[20,26,27,22,28,29,30,31,31,24,25,32],[33,26,27,34,28,29,30,35,36,36,37,32],[33,38,44,38,39,39,40,35,41,41,37,42],[43,43,44,34,45,46,40,47,48,48,49,42],[50,51,52,53,45,46,54,47,55,55,49,56],[50,51,52,53,57,58,58,59,66,60,61,56],[62,62,63,64,57,65,54,59,67,60,61,68],[69,69,63,64,70,70,65,71,66,67,71,68]])
     shape = board.shape[0]
     ops = []
     paired = np.full((shape,shape), False, dtype=bool)
 
     board,ops = solver_special(board,ops,paired)
     print(f"Number of step: {len(ops)}")
+    print("Successful!")
     with open("answer_special.json", "w") as f:
         json.dump(ops, f)
