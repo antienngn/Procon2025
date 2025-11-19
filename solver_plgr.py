@@ -82,87 +82,6 @@ def select_dynamic_block_rows(x1, y1, x2, y2, board):
 
     return x_cord, y_cord, size, n_iter
 
-
-# def select_dynamic_block_rows(x1,y1,x2,y2,board):
-#     x_cord,y_cord,size, n_iterations = 1,1,1,1
-#     shape = board.shape[0]
-#     dx = abs(x1-x2)
-#     dy = abs(y1-y2)
-#     min_iterations = 10
-#     if x1 < x2:
-#         xx = x1+1
-#         yy = y1-1
-#         dxx = abs(xx-x2)
-#         dyy = abs(yy-y2)
-#         if dxx == dyy:
-#             if 2 < min_iterations:
-#                 min_iterations = 2
-#                 x_cord,y_cord,size,n_iterations = (x1+1,y1-1,abs(yy-y2)+1,2)
-#         elif dxx == 0 and dyy < abs(x2-shape):
-#             if 1 < min_iterations:
-#                 min_iterations = 1
-#                 x_cord,y_cord,size,n_iterations = (xx,yy,dyy+1,1)
-#         elif dyy == 0 and dxx < abs(y2-shape):
-#             if 3 < min_iterations:
-#                 min_iterations = 3
-#                 x_cord,y_cord,size,n_iterations = (xx,yy,dxx+1,3)
-#         if min_iterations != 10:
-#             return x_cord, y_cord, size, n_iterations
-
-#         if dy == 0:
-#             if dx < abs(y2-shape):
-#                 x_cord,y_cord,size,n_iterations = (x1,y1,dx+1,3)
-#             else:
-#                 x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y1,abs(y2-shape),1)
-#         elif dy == 1 and y2 < y1:
-#             if abs(x2-x1+1) <= abs(y2-shape):
-#                 x_cord,y_cord,size,n_iterations = (x1+1,y2,dx,3)
-#             else: 
-#                 x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y2,abs(y2-shape),3)
-#         else:
-#             xx = x1+1
-#             yy = y1-1
-#             dxx = abs(xx-x2)
-#             dyy = abs(yy-y2)
-#             if dxx == dyy:
-#                 x_cord,y_cord,size,n_iterations = (x1+1,y1-1,abs(yy-y2)+1,2)
-#             else:
-#                 if dx == dy:
-#                     x_cord, y_cord, size, n_iterations = (x1,y1,dy+1,2)
-#                 if dx > dy:
-#                     x_cord,y_cord,size,n_iterations = (x2-dy,y2-dy,dy+1,1)
-#                 if dx < dy:
-#                     x_cord, y_cord, size, n_iterations = (x2-dx,y2-dx,dx+1,1)
-#     else:
-#         if dy == 0:
-#             if dx < abs(y2-shape):
-#                 x_cord,y_cord,size,n_iterations = (x2,y2,dx+1,1)
-#             else:
-#                 x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape),1)
-#         elif dx == 0:
-#             if dy < abs(x1-shape):
-#                 x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
-#             else:
-#                 x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
-#         elif dy == 1 and dx != 1:
-#             x_cord,y_cord,size,n_iterations = (x2,y2-1,2, 1)
-#         else:
-#             if dx == dy:
-#                 x_cord, y_cord, size, n_iterations = (x2,y1,dy+1,2)
-#             else:
-#                 if dy < abs(x2-shape):
-#                     x_cord,y_cord,size,n_iterations = (x2,y2-dy,dy+1, 1)
-#                 else:
-#                     x_cord,y_cord,size,n_iterations = (x2,y2-abs(x2-shape)+1, abs(x2-shape),1)
-    
-#     return (x_cord,y_cord,size, n_iterations)
-
-
-"""
-Task 1: Verify dynamic block for columns again - Done
-Task 2: Process when cell can move directly to target - Hmm maybe not worth 
-Task 3: Solution for special case (when anti clockwise few step) - Doingg
-"""
 def select_dynamic_block_columns(x1,y1,x2,y2,board):
     x_cord,y_cord,size, n_iterations = 1,1,1,1
     shape = board.shape[0]
@@ -193,10 +112,6 @@ def select_dynamic_block_columns(x1,y1,x2,y2,board):
                 x_cord,y_cord,size,n_iterations = (0,y2-x1,x1+1,3)
         elif dx == 1 and x2 > x1:
             x_cord,y_cord,size,n_iterations = (x2-1,y2-1,2,1)
-            # if abs(y2-y1+1) < x1:
-            #     x_cord,y_cord,size,n_iterations = (x2-dy,y1+1,dy,3)
-            # else:
-            #     x_cord,y_cord,size,n_iterations = (0,y2-x2,x2,3)
         else:
             xx = x1+1
             yy = y1+1
@@ -341,7 +256,7 @@ if __name__ == "__main__":
     # board = np.array([[0,0,1,2,2,3,4,5,6,6,7,8],[9,9,1,10,11,3,4,5,12,12,7,8],[13,14,14,10,11,15,15,16,16,17,18,18],[13,19,20,20,21,22,22,29,29,23,24,24],[25,19,26,27,21,28,28,30,30,23,31,32],[25,33,26,27,34,35,36,37,31,17,37,32],[38,33,39,40,34,35,36,41,42,42,43,44],[38,45,39,40,46,47,47,41,48,49,43,44],[50,45,51,52,46,53,53,54,48,49,55,55],[50,56,51,52,57,57,58,54,59,60,61,61],[62,56,63,63,64,64,58,65,59,60,66,67],[62,68,68,69,69,70,70,65,71,71,66,67]])
     # board = np.array([[56,60,60,59,58,58,52,51,57,56,0,7],[57,49,48,39,31,25,15,15,0,6,47,14],[62,49,54,2,3,3,4,4,5,19,53,14],[62,36,41,47,46,46,45,45,44,19,53,1],[63,36,41,40,40,34,33,32,39,29,52,8],[64,29,38,28,27,34,33,32,31,37,51,8],[59,18,30,28,27,26,26,20,25,37,44,9],[65,18,24,22,22,21,21,20,16,50,43,10],[66,5,13,11,10,9,17,17,16,50,1,11],[61,61,13,43,2,48,35,35,23,23,12,12],[67,54,7,6,67,55,55,42,42,38,30,24],[68,68,69,69,63,64,71,65,66,70,70,71]])
     # board = np.array([[0,0,1,2,2,3,3,4,5,5,6,6],[7,46,33,33,20,20,8,8,12,13,14,15],[7,39,39,26,26,16,16,1,12,13,14,15],[19,40,40,27,27,21,9,9,23,24,24,25],[19,47,34,34,28,21,17,10,23,31,31,25],[32,48,35,35,28,22,17,10,36,36,37,38],[32,41,41,29,29,22,11,11,43,44,37,38],[45,52,42,30,30,18,18,4,42,44,49,50],[45,46,51,51,47,48,52,53,43,54,49,50],[55,56,57,58,59,60,60,61,53,54,62,62],[55,67,56,58,59,63,63,61,64,65,65,66],[67,68,57,68,69,69,70,70,64,71,71,66]])
-    # board = np.array([[0,0,1,1,2,2,3,3,4,5,5,6],[7,7,8,9,10,11,12,12,4,13,14,6],[44,33,33,20,20,15,16,17,18,13,14,19],[44,37,25,25,21,15,16,17,18,24,24,19],[45,37,26,26,21,8,29,29,30,30,31,32],[38,38,27,27,22,9,34,35,35,36,31,32],[46,39,28,28,22,10,40,40,41,36,42,43],[47,39,34,23,23,11,47,48,41,49,42,43],[50,51,45,52,46,53,66,58,53,49,55,55],[50,51,56,52,57,58,59,59,48,60,61,61],[62,63,56,64,57,65,67,54,54,60,68,68],[62,63,70,64,70,65,66,71,67,69,69,71]])
+    board = np.array([[0,0,1,1,2,2,3,3,4,5,5,6],[7,7,8,9,10,11,12,12,4,13,14,6],[44,33,33,20,20,15,16,17,18,13,14,19],[44,37,25,25,21,15,16,17,18,24,24,19],[45,37,26,26,21,8,29,29,30,30,31,32],[38,38,27,27,22,9,34,35,35,36,31,32],[46,39,28,28,22,10,40,40,41,36,42,43],[47,39,34,23,23,11,47,48,41,49,42,43],[50,51,45,52,46,53,66,58,53,49,55,55],[50,51,56,52,57,58,59,59,48,60,61,61],[62,63,56,64,57,65,67,54,54,60,68,68],[62,63,70,64,70,65,66,71,67,69,69,71]])
     shape = board.shape[0]
     ops = []
     paired = np.full((shape,shape), False, dtype=bool)
