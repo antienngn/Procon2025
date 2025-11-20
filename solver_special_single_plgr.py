@@ -160,8 +160,6 @@ def subboard_is_paired_general(board, paired_global, tx, ty, size):
     if paired_or_not == False:
         shape = board.shape[0]
         if all_false_on_edge(local_paired,size):
-            # if tx + size + 1 > shape - 1 or tx - 1 < 0 or ty + size + 1 > shape - 1 or ty - 1 < 0:
-            #     return paired_or_not
             shape = board.shape[0]
             
             for j in range(size-1):
