@@ -17,6 +17,27 @@ def extract_entities(file_path, key_feature):
 
     return np.array(problem)
 
+def count_pairs(board):
+    try:
+        if hasattr(board, "tolist"):
+            board = board.tolist()
+    except Exception:
+        pass
+
+    n = len(board)
+    if n == 0:
+        return 0
+    m = len(board[0])
+
+    pairs = 0
+    for i in range(n):
+        for j in range(m):
+            if j + 1 < m and board[i][j] == board[i][j+1]:
+                pairs += 1
+            if i + 1 < n and board[i][j] == board[i+1][j]:
+                pairs += 1
+    return pairs
+
 def rotate90(x_cord, y_cord, size, n_iterations, garden, ops, r=0):
     for i in range(n_iterations):
         sub = garden[y_cord:y_cord+size, x_cord:x_cord+size]
@@ -72,20 +93,21 @@ def select_dynamic_block_last_two_rows(x1,y1,x2,y2):
 
 def select_dynamic_block(x1,y1,x2,y2,board):
     x_cord,y_cord,size, n_iterations = 1,1,1,1
-    shape = board.shape[0]
+    shape_y = board.shape[0]
+    shape_x = board.shape[1]
     dx = abs(x1-x2)
     dy = abs(y1-y2)
     if x1 < x2:
         if dy == 0:
-            if dx < abs(y2-shape):
+            if dx < abs(y2-shape_y):
                 x_cord,y_cord,size,n_iterations = (x1,y1,dx+1,3)
             else:
-                x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y1,abs(y2-shape),1)
+                x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape_y)+1,y1,abs(y2-shape_y),1)
         elif dy == 1 and y2 < y1:
-            if abs(x2-x1+1) <= abs(y2-shape):
+            if abs(x2-x1+1) <= abs(y2-shape_y):
                 x_cord,y_cord,size,n_iterations = (x1+1,y2,dx,3)
             else:
-                x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape)+1,y2,abs(y2-shape),3)
+                x_cord,y_cord,size,n_iterations = (x2-abs(y2-shape_y)+1,y2,abs(y2-shape_y),3)
         else:
             xx = x1+1
             yy = y1-1
@@ -100,15 +122,15 @@ def select_dynamic_block(x1,y1,x2,y2,board):
                     x_cord, y_cord, size, n_iterations = (x2-dx,y2-dx,dx+1,1)
     else:
         if dy == 0:
-            if dx < abs(y2-shape):
+            if dx < abs(y2-shape_y):
                 x_cord,y_cord,size,n_iterations = (x2,y2,dx+1,1)
             else:
-                x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape),1)
+                x_cord,y_cord,size,n_iterations = (x2,y2,abs(y2-shape_y),1)
         elif dx == 0:
-            if dy < abs(x1-shape):
+            if dy < abs(x1-shape_x):
                 x_cord,y_cord,size,n_iterations = (x1, y1, dy+1,1)
             else:
-                x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape)+1,abs(x1-shape),1)
+                x_cord,y_cord,size,n_iterations = (x1,y2-abs(x1-shape_x)+1,abs(x1-shape_x),1)
             
         elif dy == 1 and dx != 1:
             x_cord,y_cord,size,n_iterations = (x2,y2-1,2, 1)
@@ -116,9 +138,9 @@ def select_dynamic_block(x1,y1,x2,y2,board):
             if dx == dy:
                 x_cord, y_cord, size, n_iterations = (x2,y1,dy+1,2)
             else:
-                if dy < abs(x2-shape):
+                if dy < abs(x2-shape_x):
                     x_cord,y_cord,size,n_iterations = (x2,y2-dy,dy+1, 1)
                 else:
-                    x_cord,y_cord,size,n_iterations = (x2,y2-abs(x2-shape)+1, abs(x2-shape),1)
+                    x_cord,y_cord,size,n_iterations = (x2,y2-abs(x2-shape_x)+1, abs(x2-shape_x),1)
     
     return (x_cord,y_cord,size, n_iterations)

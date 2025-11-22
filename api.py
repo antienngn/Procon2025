@@ -1,44 +1,50 @@
 import requests
 import json
+import numpy as np
+from solver_general_optimal import solver_optimal
+from solver_special_fused import solver_hybrid
+from utils import count_pairs
 
-headers = {'Authorization': "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwibmFtZSI6IkFWSCIsImlzX2FkbWluIjpmYWxzZSwiaWF0IjoxNzI1NjA5MTE2LCJleHAiOjE3MjU3ODE5MTZ9._e_lQifCjtuBlJSzeejWohbAtUHQ6gCq2fx_eSx26Bc"}
-url = 'https://proconvn.duckdns.org'
-qid = 68
-r = requests.get(f'{url}/question/{qid}', headers=headers)
+headers = {'Authorization': "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjksIm5hbWUiOiJVRVQuY3VCTEFTIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NjM3Nzc0MTMsImV4cCI6MTc2Mzk1MDIxM30.WCHTHeTYasbS-rzn-NvexdgBAUlCJ0IBXqjecssEtWE"}
+url = 'https://procon25-api.haiuet.me'
 
-# file_path = "./Problem/problem.json"
-# key_feature = ["problem", "field", "entities"]
+#Nhập id câu hỏi ở đây
+qid = 120
 
+r = requests.get(f'{url}/question/{qid}', headers=headers, verify=False)
+# print(r.text)
+# print(r.status_code)
 question = r.json()
 data = json.loads(question["question_data"])
-board = data["board"]
-goal = board["goal"]
-start = board["start"]
-# print(start)
-res, _ = row_cutting_best.transform_until_match(start, goal)
 
-# ops = []
-# for x in res:
-#     item = {}
-#     s = x[0]
-#     if s == "right":
-#         s = 3
-#     if s == "left":
-#         s = 2
-#     if s == "up":
-#         s = 0
-#     if s == "down":
-#         s = 1
-#     item['s'] = s
-#     item['p'] = x[2]
-#     item['x'] = x[1][0]
-#     item['y'] = x[1][1]
-#     ops.append(item)
+entities = data["field"]["entities"]   
+size      = data["field"]["size"]
 
-payload = {"question_id": qid, "answer_data": {"n": len(ops), "ops": ops}}
+board = np.array(entities)
 
-# print(len(ops))
-# s = requests.post(f'{url}/answer', json=payload, headers=headers)
+ops = []
+shape = board.shape[0]
+paired = np.full((shape, shape), False, dtype=bool)
+
+total_correct_pairs = (shape*shape)//2
+
+
+
+# new_board,ops = solver_hybrid(board, ops)
+
+new_board,ops = solver_optimal(board,paired,ops,0)
+
+# print(f"Số lượng cặp: {count_pairs(new_board)}")
+payload = {
+  "question_id": qid,
+  "answer_data": {
+    "ops": ops
+  }
+}
+
+print(f"Length step: {len(ops)}")
+
+s = requests.post(f'{url}/answer', json=payload, headers=headers)
 
 # print(s.text)
 
