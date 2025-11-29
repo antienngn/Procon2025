@@ -5,8 +5,8 @@ from solver_general_optimal import solver_optimal
 from solver_special_fused import solver_hybrid
 from utils import count_pairs
 
-headers = {'Authorization': "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjksIm5hbWUiOiJVRVQuY3VCTEFTIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NjM3Nzc0MTMsImV4cCI6MTc2Mzk1MDIxM30.WCHTHeTYasbS-rzn-NvexdgBAUlCJ0IBXqjecssEtWE"}
-url = 'https://procon25-api.haiuet.me'
+headers = {'Authorization': ""}
+url = ''
 
 #Nhập id câu hỏi ở đây
 qid = 120
